@@ -1,7 +1,7 @@
 import pylab as plt
 import numpy as np
 
-FS = 500
+from settings import FS
 
 
 class SingleRhythmModel:
