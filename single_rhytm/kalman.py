@@ -54,7 +54,7 @@ class SingleRhythmKalman:
 
 
 if __name__ == '__main__':
-    from sandbox.single_rhythm_model import SingleRhythmModel
+    from single_rhytm.model import SingleRhythmModel
     np.random.seed(42)
     srm = SingleRhythmModel(10, 0.99, 0.1, 2)
     srk = SingleRhythmKalman(10, 0.99, 0.1, 2)
