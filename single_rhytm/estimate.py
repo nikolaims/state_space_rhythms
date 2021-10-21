@@ -32,7 +32,7 @@ def get_result_x(x):
 
 if __name__ == '__main__':
     srm = SingleRhythmModel(10, 0.99, 0.1, 2)
-    n_steps = 10 * FS
+    n_steps = 5 * FS
     x, y = srm.steps(n_steps)
 
 
