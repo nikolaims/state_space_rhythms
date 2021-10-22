@@ -24,7 +24,7 @@ env_true = np.sum(x**2, 1)**0.5
 cfir = CFIRBandDetector([8, 12], FS, 0)
 env_cfir = np.abs(cfir.apply(y))
 
-x0 = inv_transform([7, 0.8, 1])
+x0 = inv_transform([10-2, 0.995-0.1, 2+1.5])
 res = minimize(lambda _x: fun(_x, y.copy()), np.array(x0), method='BFGS', options={'disp': True}, tol=1)
 res_params = get_result_params(res.x, y)
 

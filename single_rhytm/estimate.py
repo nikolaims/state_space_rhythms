@@ -7,22 +7,22 @@ from settings import FS
 import numpy as np
 
 
-
 def transform(params):
-    f = sigmoid(params[0])*FS/2
-    a = sigmoid(params[1])*(1-1e-9)+0.5e-9
+    f = sigmoid(params[0]) * FS / 2
+    a = sigmoid(params[1])
     sigma = 10. ** params[2]
     return np.array([f, a, sigma])
 
+
 def inv_transform(params):
-    f = inv_sigmoid(params[0] / FS * 2 * (1 - 1e-9) + 0.5e-9)
+    f = inv_sigmoid(params[0] / FS * 2)
     a = inv_sigmoid(params[1])
     sigma = np.log10(params[2])
     return np.array([f, a, sigma])
 
 
-def fun(x, y):
-    f, a, sigma = transform(x)
+def fun(params, y):
+    f, a, sigma = transform(params)
     srk = SingleRhythmKalman(f, a, sigma, 1)
     x_pred, V_pred, x_filter, V_filter = srk.collect_states(y)
     nll, tau = nll_and_tau(x_pred, V_pred, y, srk.H)

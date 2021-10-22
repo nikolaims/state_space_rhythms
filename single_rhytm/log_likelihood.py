@@ -1,15 +1,13 @@
-from single_rhytm.model import SingleRhythmModel
-from single_rhytm.kalman import SingleRhythmKalman
 import numpy as np
-from settings import FS
-
 
 
 def sigmoid(x):
     return 1/(1 + np.exp(-x))
 
+
 def inv_sigmoid(x):
     return np.log(x) - np.log(1-x)
+
 
 def nll_and_tau(x_pred, V_pred, y, H):
     HVH_p1 = (H.reshape(1, -1) @ V_pred @ H + 1)[:, 0]
@@ -19,6 +17,10 @@ def nll_and_tau(x_pred, V_pred, y, H):
 
 
 if __name__ == '__main__':
+    from single_rhytm.model import SingleRhythmModel
+    from single_rhytm.kalman import SingleRhythmKalman
+    from settings import FS
+
     np.random.seed(42)
     srm = SingleRhythmModel(10, 0.99, 0.1, 2)
     # srk = SingleRhythmKalman(10, 0.99, 0.1, 2)
