@@ -8,10 +8,16 @@ import numpy as np
 
 
 
-def transform(x):
-    f = 10. ** x[0]
-    a = sigmoid(x[1])
-    sigma = 10. ** x[2]
+def transform(params):
+    f = sigmoid(params[0])*FS/2
+    a = sigmoid(params[1])*(1-1e-9)+0.5e-9
+    sigma = 10. ** params[2]
+    return np.array([f, a, sigma])
+
+def inv_transform(params):
+    f = inv_sigmoid(params[0] / FS * 2 * (1 - 1e-9) + 0.5e-9)
+    a = inv_sigmoid(params[1])
+    sigma = np.log10(params[2])
     return np.array([f, a, sigma])
 
 
@@ -22,7 +28,7 @@ def fun(x, y):
     nll, tau = nll_and_tau(x_pred, V_pred, y, srk.H)
     return nll
 
-def get_result_x(x, y):
+def get_result_params(x, y):
     f, a, sigma = transform(x)
     srk = SingleRhythmKalman(f, a, sigma, 1)
     x_pred, V_pred, x_filter, V_filter = srk.collect_states(y)
@@ -36,10 +42,10 @@ if __name__ == '__main__':
     x, y = srm.steps(n_steps)
 
 
-    x0 = [np.log10(1), inv_sigmoid(0.9), np.log10(1)]
+    x0 = inv_transform([1, 0.9, 1])
 
     res = minimize(lambda x: fun(x, y), np.array(x0), method='BFGS', options={'disp': True}, tol=1)
-    res_x = get_result_x(res.x, y)
+    res_x = get_result_params(res.x, y)
 
 
     srk = SingleRhythmKalman(*res_x)

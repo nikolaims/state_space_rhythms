@@ -1,6 +1,6 @@
 from scipy.optimize import minimize
 
-from single_rhytm.estimate import fun, get_result_x
+from single_rhytm.estimate import fun, get_result_params, inv_transform
 from single_rhytm.kalman import SingleRhythmKalman
 from single_rhytm.log_likelihood import inv_sigmoid
 from single_rhytm.model import SingleRhythmModel
@@ -15,9 +15,24 @@ np.random.seed(42)
 nor = lambda x: (x - x.mean())/x.std()
 srm = SingleRhythmModel(10, 0.995, 2, 20)
 n_steps = 60 * FS
+t = np.arange(n_steps)/FS
 
 x, y = srm.steps(n_steps)
-t = np.arange(n_steps)/FS
+env_true = np.sum(x**2, 1)**0.5
+
+
+cfir = CFIRBandDetector([8, 12], FS, 0)
+env_cfir = np.abs(cfir.apply(y))
+
+x0 = inv_transform([7, 0.8, 1])
+res = minimize(lambda _x: fun(_x, y.copy()), np.array(x0), method='BFGS', options={'disp': True}, tol=1)
+res_params = get_result_params(res.x, y)
+
+
+srk = SingleRhythmKalman(*res_params)
+_x_pred, _V_pred, x_filter, V_filter = srk.collect_states(y)
+env_kalman = np.sum(x_filter**2, 1)**0.5
+
 
 
 plt.figure()
@@ -30,20 +45,6 @@ axes[1].set_xlabel('freq')
 axes[1].set_xlim(0, 30)
 axes[1].legend()
 
-cfir = CFIRBandDetector([8, 12], FS, 0)
-env_cfir = np.abs(cfir.apply(y))
-
-x0 = [np.log10(1), inv_sigmoid(0.8), np.log10(1)]
-
-res = minimize(lambda _x: fun(_x, y.copy()), np.array(x0), method='BFGS', options={'disp': True}, tol=1)
-res_x = get_result_x(res.x, y)
-
-
-srk = SingleRhythmKalman(*res_x)
-_x_pred, _V_pred, x_filter, V_filter = srk.collect_states(y)
-env_kalman = np.sum(x_filter**2, 1)**0.5
-
-env_true = np.sum(x**2, 1)**0.5
 
 ax = plt.subplot(223)
 
