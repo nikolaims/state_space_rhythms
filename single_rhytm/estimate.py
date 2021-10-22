@@ -15,14 +15,14 @@ def transform(x):
     return np.array([f, a, sigma])
 
 
-def fun(x):
+def fun(x, y):
     f, a, sigma = transform(x)
     srk = SingleRhythmKalman(f, a, sigma, 1)
     x_pred, V_pred, x_filter, V_filter = srk.collect_states(y)
     nll, tau = nll_and_tau(x_pred, V_pred, y, srk.H)
     return nll
 
-def get_result_x(x):
+def get_result_x(x, y):
     f, a, sigma = transform(x)
     srk = SingleRhythmKalman(f, a, sigma, 1)
     x_pred, V_pred, x_filter, V_filter = srk.collect_states(y)
@@ -38,8 +38,8 @@ if __name__ == '__main__':
 
     x0 = [np.log10(1), inv_sigmoid(0.9), np.log10(1)]
 
-    res = minimize(fun, np.array(x0), method='BFGS', options={'disp': True}, tol=1)
-    res_x = get_result_x(res.x)
+    res = minimize(lambda x: fun(x, y), np.array(x0), method='BFGS', options={'disp': True}, tol=1)
+    res_x = get_result_x(res.x, y)
 
 
     srk = SingleRhythmKalman(*res_x)
