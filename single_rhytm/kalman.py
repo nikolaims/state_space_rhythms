@@ -83,7 +83,7 @@ class FixedLagKalman:
         K_k_0 = self.S_k_km1[0] @ _const1
         L_k_0 = self.F @ K_k_0
 
-        _const2 = self.F - L_k_0 @ self.H
+        _const2 = self.F - L_k_0.reshape(-1, 1) @ self.H.reshape(1, -1)
         x_kp1_k_0 = _const2 @ self.x_k_km1[0] + L_k_0 * y
         S_kp1_k_0 = self.F @ self.S_k_km1[0] @ _const2.T + self.sigma**2
         self.x_kp1_k = [x_kp1_k_0] + [None] * (self.N + 1)
@@ -94,7 +94,7 @@ class FixedLagKalman:
         for i in range(1, self.N+1 + 1):
             L = self.S_k_km1[i-1] @ _const1
             self.S_kp1_k[i] = self.S_k_km1[i-1] @ _const2.T
-            self.x_kp1_k[i] = self.x_k_km1[i-1] + L * (y - self.F @ self.x_k_km1[0])
+            self.x_kp1_k[i] = self.x_k_km1[i-1] + L * (y - self.H @ self.x_k_km1[0])
             S_diag = S_diag - (self.S_k_km1[i-1].T @ self.H) @ L.T
 
         self.x_k_km1 = self.x_kp1_k
